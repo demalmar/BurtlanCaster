@@ -88,17 +88,22 @@
             }
 
             uploadInput.addEventListener('change', function(e) {
+                
                 const file = e.target.files[0];
                 if (!file) return;
-
+                
                 const fileURL = URL.createObjectURL(file);
                 playerContainer.classList.remove('hidden');
-
+                
                 if (!player) {
                     initPlayer(file.name);
                 } else {
-                    // Actualizar metadatos si el player ya existe
-                    player.options_.plugins.chromecast.metadata.subtitle = file.name;
+                    // Actualizar metadatos si el player ya existe   
+                    player.plugins.chromecast.appId = undefined; // Usar el ID por defecto de Google Cast
+                    player.metadata({
+                        title: "Burtlan Caster",
+                        subtitle: file.name
+                    });
                 }
 
                 player.src({
