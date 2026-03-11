@@ -1,1 +1,114 @@
-<html>hola</html>
+<!DOCTYPE html>
+<html lang="es" data-cast-api-enabled="true">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burtlan Caster</title>
+    
+    <!-- Tailwind CSS para un diseño limpio y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Estilos de Video.js -->
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    
+    <!-- Estilos del plugin Chromecast -->
+    <link href="https://unpkg.com/@silvermine/videojs-chromecast@1.5.0/dist/silvermine-videojs-chromecast.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .video-js {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .vjs-chromecast-button .vjs-icon-placeholder:before {
+            content: "\f10b";
+            font-family: VideoJS;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+
+    <div class="w-full max-w-4xl space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-bold tracking-tight text-white">Burtlan Caster</h1>
+        </header>
+
+        <div class="flex flex-col items-center space-y-4">
+            <label for="video-upload" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>Seleccionar Video Local</span>
+            </label>
+            <input type="file" id="video-upload" accept="video/*" class="hidden">
+        </div>
+
+        <div id="player-container" class="hidden">
+            <video id="burtlan-player" class="video-js vjs-big-play-centered" controls preload="auto">
+                <p class="vjs-no-js">
+                    Para ver este video, por favor habilita JavaScript y considera actualizar a un navegador web que
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">soporte video HTML5</a>
+                </p>
+            </video>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+    <script src="https://unpkg.com/@silvermine/videojs-chromecast@1.5.0/dist/silvermine-videojs-chromecast.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadInput = document.getElementById('video-upload');
+            const playerContainer = document.getElementById('player-container');
+            let player;
+
+            function initPlayer(fileName) {
+                player = videojs('burtlan-player', {
+                    techOrder: ['html5', 'chromecast'],
+                    plugins: {
+                        chromecast: {
+                            appId: 'CC1AD845', // ID por defecto de Google Cast o el tuyo personalizado
+                            addButtonToControlBar: true,
+                            metadata: {
+                                title: "Burtlan Caster",
+                                subtitle: fileName || "Streaming Local"
+                            }
+                        }
+                    }
+                });
+            }
+
+            uploadInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const fileURL = URL.createObjectURL(file);
+                playerContainer.classList.remove('hidden');
+
+                if (!player) {
+                    initPlayer(file.name);
+                } else {
+                    // Actualizar metadatos si el player ya existe
+                    player.options_.plugins.chromecast.metadata.subtitle = file.name;
+                }
+
+                player.src({
+                    src: fileURL,
+                    type: file.type
+                });
+
+                player.play();
+            });
+        });
+    </script>
+</body>
+</html>
